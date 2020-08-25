@@ -7,10 +7,7 @@ export interface infoObject{
     emptyPoints: number
 }
 
-type CellValueCoords = {
-    value: CellValue,
-    coords: Coords
-}
+
 
 export class PlaygroundTableHelper{
     

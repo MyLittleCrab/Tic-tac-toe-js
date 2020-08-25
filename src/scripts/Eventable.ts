@@ -1,4 +1,6 @@
-export default class Eventable {
+import IEventable from './IEventable';
+
+export default class Eventable implements IEventable{
 
     private listeners: { [key: string]: Array<Function> };
     private disposableListeners: { [key: string]: Array<Function> };
@@ -16,12 +18,12 @@ export default class Eventable {
      *
      * @memberOf Eventable
      */
-    public on(event: string, callback: Function){
+    public on(event: string, callback: Function): void{
         this.listeners[event] = this.listeners[event] || [];
         this.listeners[event].push(callback);
     }
 
-    public onOnce(event: string, callback: Function){
+    public onOnce(event: string, callback: Function): void{
         this.disposableListeners[event] = this.disposableListeners[event] || [];
         this.disposableListeners[event].push(callback);      
     }
@@ -76,7 +78,7 @@ export default class Eventable {
      *
      * @memberOf Eventable
      */
-    protected trigger(event: string, ...args: Array<any>){
+    protected trigger(event: string, ...args: Array<any>): void{
         const listeners = this.listeners[event] || [];
         listeners.forEach(listener => listener(...args));
 

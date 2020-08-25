@@ -2,19 +2,11 @@ import Eventable from './Eventable';
 import IPlayer from './IPlayer';
 import { PlaygroundTableHelper } from './PlaygroundTableHelper';
 
-export enum XOValue{
-    X = 'X',
-    O = 'O'
-}
 
-export type Coords = {
-    col: number,
-    row: number
-}
 
 export type PlaygroundTable = Array<Array<CellValue>>;
 
-export type CellValue = XOValue | null;
+
 
 export class Playground extends Eventable{
     private values: PlaygroundTable = [
