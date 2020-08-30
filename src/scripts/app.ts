@@ -5,6 +5,6 @@ import GameFactory from './GameFactory';
 // const mainTable: HTMLElement | null = document.querySelector('.main-table');
 
 // if (mainTable) {
-  const game = GameFactory.singleplayer();
-  game.gameLoop();
+const game = GameFactory.singleplayer();
+game.gameLoop();
 // }

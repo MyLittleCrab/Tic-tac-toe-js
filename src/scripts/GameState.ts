@@ -41,17 +41,6 @@ export default class GameState extends Eventable implements IGameStateReadable {
     return emptyCells;
   }
 
-  public hasEmptyCells(): Boolean {
-    for (const row of this.stateArray) {
-      for (const col of row) {
-        if (col == null) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
   public isGameOver(): Boolean {
     return this.gameOverFlag;
   }
@@ -66,6 +55,7 @@ export default class GameState extends Eventable implements IGameStateReadable {
     this.gameOverChecks(move, xo);
   }
 
+  // calculate row/col/diag info in array.prototype.reduce
   private infoReducer(info: StateInfo, xoval: XOValue | null): StateInfo {
     let { X, O, empty } = info;
     switch (xoval) {
@@ -113,7 +103,6 @@ export default class GameState extends Eventable implements IGameStateReadable {
     if (rowInfo[xoMove] == 3) {
       this.setWinner(xoMove);
     }
-
     // check symbols count in col
     const colInfo = this.getColInfo(move.col);
     if (colInfo[xoMove] == 3) {
@@ -125,6 +114,10 @@ export default class GameState extends Eventable implements IGameStateReadable {
       if (diagInfo[xoMove] == 3) {
         this.setWinner(xoMove);
       }
+    }
+
+    if(this.getEmptyCells().length == 0){
+      this.gameOverFlag = true;
     }
   }
   // 1 -- \

@@ -71,11 +71,7 @@ export default class ComputerPlayer implements IPlayer {
     const emptyCells = this.state!.getEmptyCells();
     // fill center if can
     const center: Coords = { col: 1, row: 1 };
-    if (
-      this.state!.getEmptyCells().filter(
-        coord => center.row == coord.row && center.col == coord.col
-      )
-    ) {
+    if (Utils.arrayIncludesCoord(emptyCells, center)){
       return center;
     }
 

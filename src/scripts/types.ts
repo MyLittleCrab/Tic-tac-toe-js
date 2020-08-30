@@ -15,8 +15,3 @@ export type Coords = {
 };
 
 export type CellValue = XOValue | null;
-
-export type CellValueCoords = {
-  value: CellValue;
-  coords: Coords;
-};

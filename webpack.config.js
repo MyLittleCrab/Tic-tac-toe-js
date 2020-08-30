@@ -6,7 +6,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 
-const mode = 'production';
+const mode = 'development';
 
 module.exports = {
   entry: {

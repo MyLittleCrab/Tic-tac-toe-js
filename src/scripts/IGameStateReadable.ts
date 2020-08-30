@@ -3,7 +3,6 @@ import { XOValue, StateInfo, Coords } from './types';
 
 export default interface IGameStateReadable extends IEventable {
   getWinner(): XOValue | undefined;
-  hasEmptyCells(): Boolean;
   isGameOver(): Boolean;
   getColInfo(colNumber: number): StateInfo;
   getRowInfo(rowNumber: number): StateInfo;

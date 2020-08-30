@@ -4,11 +4,10 @@ import { Coords, XOValue } from './types';
 import UserInterface from './UserInterface';
 
 export default class Player implements IPlayer {
-  // private symbol: XOValue | undefined;
 
   constructor(private ui: UserInterface) {}
   setSymbol(symbol: XOValue): void {
-    // this.symbol = symbol;
+    // nothing. User can watch game state by himself
   }
 
   watchForState(state: IGameStateReadable): void {

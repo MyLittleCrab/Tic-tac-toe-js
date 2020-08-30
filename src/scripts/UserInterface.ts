@@ -12,7 +12,7 @@ export default class UserInterface extends Eventable {
   }
 
   public setValue(coord: Coords, value: CellValue) {
-    const cell = document.querySelector(`.cell[data-col="${coord.col}" data-row="${coord.row}"]`);
+    const cell = document.querySelector(`.cell[data-col="${coord.col}"][data-row="${coord.row}"]`);
     if (cell) {
       cell.textContent = value;
     }
@@ -34,13 +34,11 @@ export default class UserInterface extends Eventable {
 
         cell.addEventListener('click', event => {
           if (event.target) {
-            window.console.log('click');
             const target: HTMLElement = event.target as HTMLElement;
 
             if (target.className === 'cell') {
               const col = parseInt(target.dataset.col || '0');
               const row = parseInt(target.dataset.row || '0');
-              
               this.trigger('click', [row, col]);
             }
           }
