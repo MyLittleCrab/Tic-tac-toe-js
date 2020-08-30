@@ -1,19 +1,27 @@
-@import url('https://fonts.googleapis.com/css?family=Lato&display=swap');
-@import 'greeter';
+// @import url('https://fonts.googleapis.com/css?family=Lato&display=swap');
+// @import 'greeter';
 
-body {
-  font: 20px 'Lato', sans-serif;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-}
+// body {
+//   font: 20px 'Lato', sans-serif;
+//   display: flex;
+//   flex-flow: column;
+//   align-items: center;
+// }
 
-.notice {
-  font-family: monospace;
-  background-color: #cbcbcb;
-  padding: 1rem;
-}
+// .notice {
+//   font-family: monospace;
+//   background-color: #cbcbcb;
+//   padding: 1rem;
+// }
 
-img {
-  height: 350px;
+// img {
+//   height: 350px;
+// }
+
+
+table td {
+  width: 60px;
+  height: 60px;
+  background-color: aqua;
+  margin: 8px;
 }

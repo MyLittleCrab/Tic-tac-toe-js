@@ -3,14 +3,12 @@ import { CellValue, Coords } from './types';
 import UserInterface from './UserInterface';
 // Подумать над тем, чтобы переименовать UserInterface и Renderer
 export default class Renderer {
-    constructor(private ui: UserInterface){
-        
-    }
-    public async watchForState(state : IGameStateReadable): Promise<void>{
-        state.on('change', this.renderChange);
-    }
+  constructor(private ui: UserInterface) {}
+  public async watchForState(state: IGameStateReadable): Promise<void> {
+    state.on('change', this.renderChange);
+  }
 
-    public async renderChange(move: Coords, xo: CellValue): Promise<void>{
-        
-    }
-};
+  public async renderChange(move: Coords, xo: CellValue): Promise<void> {
+    this.ui.setValue(move, xo);
+  }
+}

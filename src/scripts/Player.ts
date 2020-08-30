@@ -1,31 +1,25 @@
-import { Playground } from './Playground';
 import IPlayer from './IPlayer';
 import IGameStateReadable from './IGameStateReadable';
-import { Coords } from './types';
+import { Coords, XOValue } from './types';
 import UserInterface from './UserInterface';
 
-export default class Player implements IPlayer{
-    public playground: Playground | undefined;
+export default class Player implements IPlayer {
+  // private symbol: XOValue | undefined;
 
-    constructor(private ui: UserInterface){
-    }
-    watchForState(state: IGameStateReadable): void {
-        throw new Error("Method not implemented.");
-    }
-    makeMove(): Promise<Coords> {
-        throw new Error("Method not implemented.");
-    }
+  constructor(private ui: UserInterface) {}
+  setSymbol(symbol: XOValue): void {
+    // this.symbol = symbol;
+  }
 
-    // public async makeMove(): Promise<Coords>{
-    //     if (this.playground){
-    //         this.playground.activate();
-    //         const clickCoords = await this.playground.onPromise('click');
-    //         return {
-    //             col: clickCoords[0],
-    //             row: clickCoords[1]
-    //         };
-    //     } else {
-    //         throw new Error('Cannot find playground to play');
-    //     }
-    // }
+  watchForState(state: IGameStateReadable): void {
+    // nothing. User can watch game state by himself
+  }
+
+  async makeMove(): Promise<Coords> {
+    const clickCoords = await this.ui.onPromise('click');
+    return {
+      row: clickCoords[0],
+      col: clickCoords[1],
+    };
+  }
 }

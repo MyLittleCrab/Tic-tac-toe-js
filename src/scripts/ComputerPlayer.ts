@@ -1,148 +1,127 @@
-import { PlaygroundTable, Playground } from './Playground';
 import IPlayer from './IPlayer';
-import { PlaygroundTableHelper } from './PlaygroundTableHelper';
-import Utils from './Utils';
 import IGameStateReadable from './IGameStateReadable';
-import { Coords } from './types';
+import { Coords, XOValue, StateInfo } from './types';
+import Utils from './Utils';
 
-export default class ComputerPlayer implements IPlayer{
+export default class ComputerPlayer implements IPlayer {
+  private symbol: XOValue | undefined;
+  private enemy: XOValue | undefined;
 
-    // private playground: Playground | undefined;
+  private state: IGameStateReadable | null = null;
 
-    private state: IGameStateReadable | null = null;
+  constructor() {}
 
-    constructor(){
+  public setSymbol(symbol: XOValue): void {
+    this.symbol = symbol;
+    this.enemy = this.symbol == XOValue.O ? XOValue.X : XOValue.O;
+  }
+  public watchForState(state: IGameStateReadable): void {
+    this.state = state;
+  }
+  private getRandomCell(cells: Array<Coords>): Coords {
+    return cells[Utils.getRandomInt(0, cells.length)];
+  }
+
+  private tryMove(validator: Function): Coords | null {
+    if (!this.state) {
+      throw new Error('Cannot calc move without link to game state');
     }
-    watchForState(state: IGameStateReadable): void {
-        this.state = state;
-        throw new Error("Method not implemented.");
+    if (!this.enemy || !this.symbol) {
+      throw new Error('Cannot calc move without XO symbol assign');
     }
-    makeMove(): Promise<Coords> {
-        throw new Error("Method not implemented.");
+    const emptyCells = this.state.getEmptyCells();
+
+    for (const rowIndex of this.state.indexes) {
+      const info = this.state.getRowInfo(rowIndex);
+      if (validator(info)) {
+        return this.getRandomCell(emptyCells.filter(coord => coord.row == rowIndex));
+      }
     }
 
+    for (const colIndex of this.state.indexes) {
+      const info = this.state.getColInfo(colIndex);
+      if (validator(info)) {
+        return this.getRandomCell(emptyCells.filter(coord => coord.col == colIndex));
+      }
+    }
 
-    // public async makeMove(playgroundTable: PlaygroundTable, xo: XOValue): Promise<Coords>{
-    //     // 1. Если у компьютера остаётся один ход до победы: атакуем и побеждаем
-    //     //     1.1 По строкам
-    //     //     1.2 По столбцам
-    //     //     1.3 по диагоналям
-    //     // 2. Если требуется защита -- защищаемся
-    //     //     2.1 по строкам
-    //     //     2.2 по столбцам
-    //     //     2.3 по диагоналям
-    //     // 3. Если ничего интересного -- атакуем
-    //     //     3.1 Свободен центр -- занимаем
-    //     //     3.2 Если у нас нет ноликов -- ставим в рандомную клетку
-    //     //     3.3 Если нолик один -- пытаемся рассмотреть его в контексте строк/столбцов/диагоналей
-    //     // 4. Если понимаем, что победить совсем не получится -- ставим в рандомную точку
+    for (const diagIndex of this.state.diagIndexes) {
+      const info = this.state.getDiagInfo(diagIndex);
+      const diagCoords = this.state.getDiagCoords(diagIndex);
+      if (validator(info)) {
+        return this.getRandomCell(
+          emptyCells.filter(coord => Utils.arrayIncludesCoord(diagCoords, coord))
+        );
+      }
+    }
+    return null;
+  }
 
+  private tryLastMoveToWin(): Coords | null {
+    // if enemy not have symbols on this row/col/diag and row/col/diag has last empty cell
+    return this.tryMove((info: StateInfo) => info[this.enemy!] == 0 && info.empty == 1);
+  }
 
-    //     const helper = new PlaygroundTableHelper(playgroundTable);
-    //     //  Если остался один ход до победы -- делаем:
-    //     // по строкам:
-    //     for (const row of helper.indexes){
-    //         const info = helper.getRowInfo(row);
-    //         const enemyPoints = xo === XOValue.O ? info.xPoints : info.oPoints;
-    //         if (info.emptyPoints === 1 && enemyPoints === 0){
-    //             return helper.getRandomEmptyCellOnRow(row);
-    //         }
-    //     }
+  private tryDefence(): Coords | null {
+    // if enemy has 2 symbols on this row/col/diag and row/col/diag has last empty cell
+    return this.tryMove((info: StateInfo) => info[this.enemy!] == 2 && info.empty == 1);
+  }
 
-    //     // По столбцам:
-    //     for (const col of helper.indexes){
-    //         const info = helper.getColInfo(col);
-    //         const enemyPoints = xo === XOValue.O ? info.xPoints : info.oPoints;
-    //         if (info.emptyPoints === 1 && enemyPoints === 0){
-    //             return helper.getRandomEmptyCellOnCol(col);
-    //         }            
-    //     }
+  private tryAttack(): Coords | null {
+    const emptyCells = this.state!.getEmptyCells();
+    // fill center if can
+    const center: Coords = { col: 1, row: 1 };
+    if (
+      this.state!.getEmptyCells().filter(
+        coord => center.row == coord.row && center.col == coord.col
+      )
+    ) {
+      return center;
+    }
 
-    //     // по диагоналям
-    //     for (const diag of helper.diagIndexes){
-    //         const info = helper.getDiagInfo(diag);
-    //         const enemyPoints = xo === XOValue.O ? info.xPoints : info.oPoints;
-    //         if (info.emptyPoints === 1 && enemyPoints === 0){
-    //             return helper.getRandomEmptyCellOnDiag(diag);
-    //         }   
-    //     }
+    // if this player has no symbols -- fill random cell
+    const playersMoves = this.state!.indexes.map(rowIndex =>
+      this.state!.getRowInfo(rowIndex)
+    ).reduce((count, info) => count + info[this.symbol!], 0);
 
-    //     // Если требуется защита -- защищаемся
-    //     // по строкам:
-    //     for (const row of helper.indexes){
-    //         const info = helper.getRowInfo(row);
-    //         const enemyPoints = xo === XOValue.O ? info.xPoints : info.oPoints;
-    //         if (info.emptyPoints > 0 && enemyPoints === 2){
-    //             return helper.getRandomEmptyCellOnRow(row);
-    //         }
-    //     }
+    if (playersMoves == 0) {
+      return this.getRandomCell(emptyCells);
+    }
 
-    //     // По столбцам:
-    //     for (const col of helper.indexes){
-    //         const info = helper.getColInfo(col);
-    //         const enemyPoints = xo === XOValue.O ? info.xPoints : info.oPoints;
-    //         if (info.emptyPoints > 0 && enemyPoints === 2){
-    //             return helper.getRandomEmptyCellOnCol(col);
-    //         }            
-    //     }
+    // if this player has one symbol on the playground: look at the context
+    if (playersMoves == 1) {
+      return this.tryMove(
+        (info: StateInfo) => info[this.symbol!] == 1 && info[this.enemy!] == 0 && info.empty > 0
+      );
+    }
+    return null;
+  }
 
-    //     // по диагоналям
-    //     for (const diag of helper.diagIndexes){
-    //         const info = helper.getDiagInfo(diag);
-    //         const enemyPoints = xo === XOValue.O ? info.xPoints : info.oPoints;
-    //         if (info.emptyPoints > 0 && enemyPoints === 2){
-    //             return helper.getRandomEmptyCellOnDiag(diag);
-    //         }   
-    //     }        
+  public async makeMove(): Promise<Coords> {
+    if (!this.state) {
+      throw new Error('Cannot calc move without link to game state');
+    }
 
-    //     // если ничего интересного -- атакуем
-    //     // Если свободен центр -- занимаем
-    //     const center = helper.getRow(1)[1];
-    //     if (!center.value){
-    //         return center.coords;
-    //     }
+    let moveCoords: Coords | null = null;
 
-    //     // Если у нас нет ходов и нечего продолжать -- ставим в рандомную клетку
-    //     const allInfo = helper.getAllInfo();
-    //     const myPoints = xo === XOValue.O ? allInfo.oPoints : allInfo.xPoints;
-    //     if (myPoints === 0){
-    //         return helper.getRandomEmptyCell();
-    //     }
+    // If the player has one move left to win: attack and win
+    moveCoords = this.tryLastMoveToWin();
+    if (moveCoords) {
+      return moveCoords;
+    }
 
-    //     // Если у нас всего одна точка, то пытаемся его рассмотреть в контексте
-    //     // текущих строк/стобцов/диагоналей
-    //     if (myPoints === 1){
-    //         const myPointsArr = xo === XOValue.O ? helper.getOPoints() : helper.getXPoints();
-    //         const myPoint = myPointsArr[0];
+    // If need defence: defend
+    moveCoords = this.tryDefence();
+    if (moveCoords) {
+      return moveCoords;
+    }
 
-    //         // row
-    //         const rowInfo = helper.getRowInfo(myPoint.coords.row);
-    //         const rowEnemyPoints = xo === XOValue.O ? rowInfo.xPoints : rowInfo.oPoints;
-    //         if (rowEnemyPoints === 0){
-    //             return helper.getRandomEmptyCellOnRow(myPoint.coords.row);
-    //         }
+    // If we don't see anything interesting: attack
+    moveCoords = this.tryAttack();
+    if (moveCoords) {
+      return moveCoords;
+    }
 
-    //         // col
-    //         const colInfo = helper.getColInfo(myPoint.coords.col);
-    //         const colEnemyPoints = xo === XOValue.O ? colInfo.xPoints : colInfo.oPoints;
-    //         if (colEnemyPoints === 0){
-    //             return helper.getRandomEmptyCellOnCol(myPoint.coords.col);
-    //         }
-
-    //         // diag
-    //         for (const index of helper.diagIndexes){
-    //             const coords = helper.getDiagIndexes(index);
-    //             if (Utils.arrayIncludes(coords, myPoint.coords)){
-    //                 // Если наша точка является частью какой-то диагонали
-    //                 return helper.getRandomEmptyCellOnDiag(index);
-    //             }
-    //         }
-    //     }
-
-    //     if (allInfo.emptyPoints > 0){
-    //         return helper.getRandomEmptyCell();
-    //     } else {
-    //         throw new Error("No one empty cell in playground!");
-    //     }
-    // }
+    return this.getRandomCell(this.state.getEmptyCells());
+  }
 }

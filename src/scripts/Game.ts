@@ -4,28 +4,34 @@ import GameState from './GameState';
 import { XOValue } from './types';
 
 export default class Game {
-    private state: GameState;
+  private state: GameState;
+  private players: Map<XOValue, IPlayer> = new Map();
+  private currentTurn: XOValue = XOValue.X;
 
-    constructor(private player1: IPlayer,
-        private player2: IPlayer,
-        private renderer: Renderer) {
-        
-        this.state = new GameState();
-        this.gameLoop();
+  constructor(player1: IPlayer, player2: IPlayer, private renderer: Renderer) {
+    this.state = new GameState();
+
+    this.players.set(XOValue.X, player1);
+    this.players.set(XOValue.O, player2);
+
+    for (const [symbol, player] of this.players) {
+      player.setSymbol(symbol);
+      player.watchForState(this.state.readonly());
     }
+  }
 
-    private async gameLoop(): Promise<void>{
+  private nextTurn(): void {
+    this.currentTurn = this.currentTurn === XOValue.O ? XOValue.X : XOValue.O;
+  }
 
-        await this.renderer.watchForState(this.state.readonly());
-        this.player1.watchForState(this.state.readonly());
-        this.player2.watchForState(this.state.readonly());
+  public async gameLoop(): Promise<void> {
+    await this.renderer.watchForState(this.state.readonly());
 
-        while(this.state.hasEmptyCells()){
-            const player1Move = await this.player1.makeMove();
-            this.state.setPlayerMove(player1Move, XOValue.X);
+    while (!this.state.isGameOver()) {
+      const playerMove = await this.players.get(this.currentTurn)!.makeMove();
+      this.state.setPlayerMove(playerMove, this.currentTurn);
 
-            const player2Move = await this.player2.makeMove();
-            this.state.setPlayerMove(player2Move, XOValue.O);
-        }
+      this.nextTurn();
     }
-};
+  }
+}
