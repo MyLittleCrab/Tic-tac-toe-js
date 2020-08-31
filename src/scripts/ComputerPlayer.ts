@@ -15,9 +15,11 @@ export default class ComputerPlayer implements IPlayer {
     this.symbol = symbol;
     this.enemy = this.symbol == XOValue.O ? XOValue.X : XOValue.O;
   }
+  
   public watchForState(state: IGameStateReadable): void {
     this.state = state;
   }
+
   private getRandomCell(cells: Array<Coords>): Coords {
     return cells[Utils.getRandomInt(0, cells.length)];
   }
